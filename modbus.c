@@ -55,7 +55,6 @@ int getModbusValues()
 
      	 
 	// Run through each device
-	//for(deviceId=1 ; deviceId<2 ; deviceId++)
 	for(deviceId=1 ; deviceId<(config.dsTotal+1) ; deviceId++)
 	{	     
 	   mb = modbus_new_rtu(dataSource[deviceId].interface, 
@@ -68,8 +67,8 @@ int getModbusValues()
 
 
         // Set per-byte and total timeouts, this format has changed from the older libmodbus version.		
-		// This could be useful if we've a latent RF-Link 
-		// TODO : Don't hard code this, allow it to be configurable
+	// This could be useful if we've a latent RF-Link 
+	// TODO : Don't hard code this, allow it to be configurable
         modbus_set_response_timeout(mb, 5, (5*1000000));
         modbus_set_byte_timeout(mb,5,(5*1000000));
 
@@ -77,7 +76,7 @@ int getModbusValues()
         // Enable/Disable Modbus debug
         modbus_set_debug(mb, FALSE);
 
-		// check we can connect (not sure if this is relevant on serial modbus)
+	// check we can connect (not sure if this is relevant on serial modbus)
         if(modbus_connect(mb) == -1)
         {
                 printf("Connect Failed to Modbus ID [%i] on [%s]\n", dataSource[deviceId].modbusId, 
@@ -151,12 +150,7 @@ int getModbusValues()
 		// window length and whether we're out of registers to process
 		// Note that the registers addresses may not be an adjacent
 		while( wRegId <= (dataSource[deviceId].numRegisters) )
-		{
-			
-		    /* printf("REQBLD : wRegId=[%i/%i]\twStartReg=[%i]\twEndReg=[%i]\tReg Win Size =[%i]\t--- Considering Adding Id[%i] RegAddr[%i]  Type[%i] ",
-			   wRegId, dataSource[deviceId].numRegisters, wStartReg, wEndReg, (wEndReg-wStartReg), wRegId, dataSource[deviceId].regAddress[wRegId], dataSource[deviceId].regType[wRegId] );
-			*/
-			
+		{	
 			// Are we looking at a 32bit double register type?
 			if (dataSource[deviceId].regType[wRegId] >2)  
 			{
@@ -165,7 +159,6 @@ int getModbusValues()
 				{                     					
 					// Great, there's room so we can include it in this run
 					wEndReg=( dataSource[deviceId].regAddress[wRegId]+1 );					
-					//printf("...ADDING 32Bit Reg, wEndReg ->[%i] \n",wEndReg);	
 					
 					// We can now move to the next register in the list
 					wRegId++;					
@@ -174,10 +167,7 @@ int getModbusValues()
 				{
 					// Drat, no room left, oh well flag as ready and we'll pick it up at the start of the next run
 					// when we reset and move the window.
-					requestFull=1;		
-
-					//printf("FULL32 : No room for wRegId=%i \n",wRegId);
-					
+					requestFull=1;						
 				}
 					
 			}	
@@ -188,7 +178,6 @@ int getModbusValues()
 				{					
 					// Great, there's room so we can include it in this run
 					wEndReg=dataSource[deviceId].regAddress[wRegId];
-					//printf("...ADDING 16Bit Reg, wEndReg ->[%i] \n",wEndReg);	
 					
 					// We can now move to the next register in the list
 					wRegId++;
@@ -198,8 +187,6 @@ int getModbusValues()
 					// Drat, no room left, oh well flag as ready and we'll pick it up at the start of the next run 
 					// when we reset and move the window.
 					requestFull=1;		
-
-					//printf("FULL16 : No room for wRegId=%i\n",wRegId);		
 				}					
 			}	
 						
@@ -224,12 +211,6 @@ int getModbusValues()
 
 				requestedRegisters=(wEndReg-wStartReg);				
 				
-				/* printf( "REQST  : DeviceAdd=%i Request %i Registers Starting From Modbus Register %i (Registers %i - %i)\n",dataSource[deviceId].modbusId,
-																														   (requestedRegisters+1),
-																														   (wStartReg-1),
-																														    wStartReg,
-																														    wEndReg );
-				*/				
 				rc = modbus_read_registers(mb, (wStartReg-1), (requestedRegisters+1) , mbdata_UI16);		
 	
 				if (rc == -1)
@@ -283,13 +264,7 @@ void decodeModbusReg(int deviceId,int windowRegId,int requestedRegisters, uint16
 	// Cycle through the reply registers until we exceed the requested total number of registers requested
 	// mbdata_UI16 starts at 0
 	while (mbReplyId <= requestedRegisters)
-	{		
-		
-		/*
-		printf("PROCSS : Checking if reply address [%i] is a match for current target register [%i] \t\t Reply 16 bit contents [%i]  \n", mbReplyRegAddress, 
-		                                                                                                                                  dataSource[deviceId].regAddress[windowRegId], 
-																																		  mbdata_UI16[mbReplyId]);
-		*/																																
+	{				
 		// Check if the current address in the modbus reply list is one we're interested in
 		if (mbReplyRegAddress == dataSource[deviceId].regAddress[windowRegId] )
 		{
@@ -331,9 +306,7 @@ void decodeModbusReg(int deviceId,int windowRegId,int requestedRegisters, uint16
 							dataSource[deviceId].value[windowRegId] = *((float *)&mbTotal);
 							break;
 			} // reg type switch
-			/*
-			printf("DCODE  : Match Found - Address [%i] Type [%i] decoded value [%f] \n",dataSource[deviceId].regAddress[windowRegId],dataSource[deviceId].regType[windowRegId],dataSource[deviceId].value[windowRegId] );
-			*/
+			
 			// Now we've matched & decoded we can move on to next target register 
 			windowRegId++;			
 		}	// match if
