@@ -6,7 +6,7 @@ Dependancies :
 
 Compile as below or use 'make all' 
 
-```# gcc log.c -o log -lsqlite3 -lmodbus -lm```
+```# gcc log.c -o log -lsqlite3 -lmodbus```
 
 
 Sample syntax 
