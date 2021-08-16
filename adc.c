@@ -620,7 +620,7 @@ int getChanConfig(modbus_t *mb, int deviceId)
 }
 
 
-// Uses modbus_write_registers (FC16) to reset min readings back to 0 
+// Uses modbus_write_registers (FC16) to reset min readings to max value so current reading is always below it
 int resetMinReadings(int deviceId) 
 {  
 
@@ -628,7 +628,7 @@ int resetMinReadings(int deviceId)
 	int regId;
 
 
-	uint16_t tableRegisters[16] = {32767,32767,32767,32767,32767,32767,32767,32767,32767,32767,32767,32767,32767,32767,32767,32767}; // 8 element array for use with modbus write command 
+	uint16_t tableRegisters[16] = {32767,32767,32767,32767,32767,32767,32767,32767,32767,32767,32767,32767,32767,32767,32767,32767};
 
 	// modbus device handle
 	modbus_t *mb;  
@@ -684,7 +684,7 @@ int resetMinReadings(int deviceId)
 }
 
 
-// Uses modbus_write_registers (FC16) to reset min readings back to 0 
+// Uses modbus_write_registers (FC16) to reset max readings to 0 so current values always exceeds it
 int resetMaxReadings(int deviceId) 
 {  
 
@@ -692,7 +692,7 @@ int resetMaxReadings(int deviceId)
 	int regId;
 
 
-	uint16_t tableRegisters[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}; // 8 element array for use with modbus write command 
+	uint16_t tableRegisters[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}; 
 
 	// modbus device handle
 	modbus_t *mb;  
