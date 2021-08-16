@@ -63,6 +63,9 @@ int main(int argc, char *argv[])
 	int adcAverageSetting = 0;
 	int modbusBaudSetting = 0;
 	int chanResSetting[9] = {0};
+	int modeScalar=1; // 4-20ma = x10   0-10V = x5  (see user guide)  default = 1
+	int setMaxToZero=0;
+	int setMinToZero=0;
 
 	// Load Config, this is
 	readConfig();
@@ -73,7 +76,7 @@ int main(int argc, char *argv[])
 	//
 	// The colon after the letter tells getopt to expect an argument after the option
 	// To disable the automatic error printing, put a colon as the first character
-	while ((opt = getopt(argc, argv, ":hjcda:b:p:1:2:3:4:5:6:7:8:v:m:w")) != -1)
+	while ((opt = getopt(argc, argv, ":hjcda:b:p:rtxl1:2:3:4:5:6:7:8:v:m:w")) != -1)
 	{
 		switch (opt)
 		{
@@ -108,6 +111,20 @@ int main(int argc, char *argv[])
 			displayType = HUMANREAD;
 			configWrite = 1;
 			break;
+		case 'r': // 4-20mA output display
+			modeScalar = 10;
+			break;			
+		case 't': // 0-10V output display
+			modeScalar = 5;
+			break;			
+		case 'x':
+			setMaxToZero=1;
+			displayType = HUMANREAD;
+			break;
+		case 'l':
+			setMinToZero=1;
+			displayType = HUMANREAD;
+			break;	
 		case '1': // Configure RTU Channel 1 ADC Resolution setting
 			if (atoi(optarg) < 5 && atoi(optarg) > 0)
 			{
@@ -170,11 +187,16 @@ int main(int argc, char *argv[])
 			break;
 		case '?':
 			printf("Synapse RTU-AI8 Reader - v1.0\n\n");
-			printf("%s [-h|j|c] [-a] [-b] [-p] [-1] [-2] [-3] [-4] [-5] [-6] [-7] [-8] [-v] [-m] [-w] [-d]\n\n", argv[0]);
+			printf("%s [-h|j|c] [-a] [-b] [-p] [-r] [-t] [-1] [-2] [-3] [-4] [-5] [-6] [-7] [-8] [-v] [-m] [-w] [-d]\n\n", argv[0]);
 			printf("Syntax :\n\n");
 			printf("-h = Human readable output (default)\n");
 			printf("-j = JSON readable output\n");
 			printf("-c = Comma delimited minimal output\n");
+			printf("-r = Output scaled for 4-20mA readings\n");
+			printf("-t = Output scaled for 0-10V readings\n");
+			printf("\n");
+			printf("-x = Reset Max readings (all channels)\n");
+			printf("-l = Reset Min readings (all channels)\n");
 			printf("\n");
 			printf("-a = Set Modbus device address (1-255)                                               - default=1 \n");
 			printf("-b = Set serial baud rate (9600/14400/19200/38400/57600)                             - default=19200 \n");
@@ -219,6 +241,29 @@ int main(int argc, char *argv[])
 			exit(1);
 		}
 	}
+	
+
+
+	if (setMinToZero == 1)
+	{
+		if (resetMinReadings(deviceId) == -1)
+		{
+			printf("..Fatal Error : Error Reading Modbus device(s) \n\n");
+			exit(1);
+		}
+	}
+
+	if (setMaxToZero == 1)
+	{
+		if (resetMaxReadings(deviceId) == -1)
+		{
+			printf("..Fatal Error : Error Reading Modbus device(s) \n\n");
+			exit(1);
+		}
+	}
+
+
+
 
 	if (debugMode == 1)
 	{
@@ -257,7 +302,7 @@ int main(int argc, char *argv[])
 				printf("   \"device %i\" : {\n", deviceId);
 		}
 
-		displayAdcValues(deviceId, displayType);
+		displayAdcValues(deviceId, displayType, modeScalar);
 
 		if (displayType == JSONREAD)
 		{

@@ -61,7 +61,7 @@ int readConfig()
 
 	
 	// this MUST equal the total number of registered configured 
-	dataSource[deviceId].numRegisters=31;
+	dataSource[deviceId].numRegisters=32;
 
 
 	//***************************************************************
@@ -102,7 +102,7 @@ int readConfig()
 	dataSource[deviceId].regAddress[29] =57 ;	dataSource[deviceId].regType[29] =3  ;		// ADC Channel 5 Minimum Reading  (32bit integer big endian)	
 	dataSource[deviceId].regAddress[30] =59 ;	dataSource[deviceId].regType[30] =3  ;		// ADC Channel 6 Minimum Reading  (32bit integer big endian)	
 	dataSource[deviceId].regAddress[31] =61 ;	dataSource[deviceId].regType[31] =3  ;		// ADC Channel 7 Minimum Reading  (32bit integer big endian)	
-
+	dataSource[deviceId].regAddress[32] =63 ;	dataSource[deviceId].regType[32] =3  ;		// ADC Channel 7 Minimum Reading  (32bit integer big endian)	
 }
 
 void printConfig()

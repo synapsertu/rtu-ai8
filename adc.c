@@ -32,7 +32,7 @@
 
 	
 
-void displayAdcValues(int deviceId, int displayType)
+void displayAdcValues(int deviceId, int displayType, int modeScalar)
 {
 	int regId;
 	const char *adcRes[5];
@@ -54,52 +54,52 @@ void displayAdcValues(int deviceId, int displayType)
 	for(regId=1 ; regId<(dataSource[deviceId].numRegisters+1) ; regId++)
 	{	
 		// Deals with chan 1 value registers
-		if ( dataSource[deviceId].regAddress[regId] == 1  ) { chanLve[1]=dataSource[deviceId].value[regId]; }
-		if ( dataSource[deviceId].regAddress[regId] == 17 ) { chanAvg[1]=dataSource[deviceId].value[regId]; }
-		if ( dataSource[deviceId].regAddress[regId] == 33 ) { chanMax[1]=dataSource[deviceId].value[regId]; }
-		if ( dataSource[deviceId].regAddress[regId] == 49 ) { chanMin[1]=dataSource[deviceId].value[regId]; }
+		if ( dataSource[deviceId].regAddress[regId] == 1  ) { chanLve[1]=(dataSource[deviceId].value[regId] * modeScalar); }
+		if ( dataSource[deviceId].regAddress[regId] == 17 ) { chanAvg[1]=(dataSource[deviceId].value[regId] * modeScalar); }
+		if ( dataSource[deviceId].regAddress[regId] == 33 ) { chanMax[1]=(dataSource[deviceId].value[regId] * modeScalar); }
+		if ( dataSource[deviceId].regAddress[regId] == 49 ) { chanMin[1]=(dataSource[deviceId].value[regId] * modeScalar); }
 		
 		// Deals with chan 2 value registers
-		if ( dataSource[deviceId].regAddress[regId] == 3  ) { chanLve[2]=dataSource[deviceId].value[regId]; }
-		if ( dataSource[deviceId].regAddress[regId] == 19 ) { chanAvg[2]=dataSource[deviceId].value[regId]; }
-		if ( dataSource[deviceId].regAddress[regId] == 35 ) { chanMax[2]=dataSource[deviceId].value[regId]; }
-		if ( dataSource[deviceId].regAddress[regId] == 51 ) { chanMin[2]=dataSource[deviceId].value[regId]; }
+		if ( dataSource[deviceId].regAddress[regId] == 3  ) { chanLve[2]=(dataSource[deviceId].value[regId] * modeScalar); }
+		if ( dataSource[deviceId].regAddress[regId] == 19 ) { chanAvg[2]=(dataSource[deviceId].value[regId] * modeScalar); }
+		if ( dataSource[deviceId].regAddress[regId] == 35 ) { chanMax[2]=(dataSource[deviceId].value[regId] * modeScalar); }
+		if ( dataSource[deviceId].regAddress[regId] == 51 ) { chanMin[2]=(dataSource[deviceId].value[regId] * modeScalar); }
 		
 		// Deals with chan 3 value registers
-		if ( dataSource[deviceId].regAddress[regId] == 5  ) { chanLve[3]=dataSource[deviceId].value[regId]; }
-		if ( dataSource[deviceId].regAddress[regId] == 21 ) { chanAvg[3]=dataSource[deviceId].value[regId]; }
-		if ( dataSource[deviceId].regAddress[regId] == 37 ) { chanMax[3]=dataSource[deviceId].value[regId]; }
-		if ( dataSource[deviceId].regAddress[regId] == 53 ) { chanMin[3]=dataSource[deviceId].value[regId]; }
+		if ( dataSource[deviceId].regAddress[regId] == 5  ) { chanLve[3]=(dataSource[deviceId].value[regId] * modeScalar); }
+		if ( dataSource[deviceId].regAddress[regId] == 21 ) { chanAvg[3]=(dataSource[deviceId].value[regId] * modeScalar); }
+		if ( dataSource[deviceId].regAddress[regId] == 37 ) { chanMax[3]=(dataSource[deviceId].value[regId] * modeScalar); }
+		if ( dataSource[deviceId].regAddress[regId] == 53 ) { chanMin[3]=(dataSource[deviceId].value[regId] * modeScalar); }
 
 		// Deals with chan 4 value registers
-		if ( dataSource[deviceId].regAddress[regId] == 7  ) { chanLve[4]=dataSource[deviceId].value[regId]; }
-		if ( dataSource[deviceId].regAddress[regId] == 23 ) { chanAvg[4]=dataSource[deviceId].value[regId]; }
-		if ( dataSource[deviceId].regAddress[regId] == 39 ) { chanMax[4]=dataSource[deviceId].value[regId]; }
-		if ( dataSource[deviceId].regAddress[regId] == 55 ) { chanMin[4]=dataSource[deviceId].value[regId]; }
+		if ( dataSource[deviceId].regAddress[regId] == 7  ) { chanLve[4]=(dataSource[deviceId].value[regId] * modeScalar); }
+		if ( dataSource[deviceId].regAddress[regId] == 23 ) { chanAvg[4]=(dataSource[deviceId].value[regId] * modeScalar); }
+		if ( dataSource[deviceId].regAddress[regId] == 39 ) { chanMax[4]=(dataSource[deviceId].value[regId] * modeScalar); }
+		if ( dataSource[deviceId].regAddress[regId] == 55 ) { chanMin[4]=(dataSource[deviceId].value[regId] * modeScalar); }
 		
 		// Deals with chan 5 value registers
-		if ( dataSource[deviceId].regAddress[regId] == 9  ) { chanLve[5]=dataSource[deviceId].value[regId]; }
-		if ( dataSource[deviceId].regAddress[regId] == 25 ) { chanAvg[5]=dataSource[deviceId].value[regId]; }
-		if ( dataSource[deviceId].regAddress[regId] == 41 ) { chanMax[5]=dataSource[deviceId].value[regId]; }
-		if ( dataSource[deviceId].regAddress[regId] == 57 ) { chanMin[5]=dataSource[deviceId].value[regId]; }
+		if ( dataSource[deviceId].regAddress[regId] == 9  ) { chanLve[5]=(dataSource[deviceId].value[regId] * modeScalar); }
+		if ( dataSource[deviceId].regAddress[regId] == 25 ) { chanAvg[5]=(dataSource[deviceId].value[regId] * modeScalar); }
+		if ( dataSource[deviceId].regAddress[regId] == 41 ) { chanMax[5]=(dataSource[deviceId].value[regId] * modeScalar); }
+		if ( dataSource[deviceId].regAddress[regId] == 57 ) { chanMin[5]=(dataSource[deviceId].value[regId] * modeScalar); }
 
 		// Deals with chan 6 value registers
-		if ( dataSource[deviceId].regAddress[regId] == 11 ) { chanLve[6]=dataSource[deviceId].value[regId]; }
-		if ( dataSource[deviceId].regAddress[regId] == 27 ) { chanAvg[6]=dataSource[deviceId].value[regId]; }
-		if ( dataSource[deviceId].regAddress[regId] == 43 ) { chanMax[6]=dataSource[deviceId].value[regId]; }
-		if ( dataSource[deviceId].regAddress[regId] == 59 ) { chanMin[6]=dataSource[deviceId].value[regId]; }
+		if ( dataSource[deviceId].regAddress[regId] == 11 ) { chanLve[6]=(dataSource[deviceId].value[regId] * modeScalar); }
+		if ( dataSource[deviceId].regAddress[regId] == 27 ) { chanAvg[6]=(dataSource[deviceId].value[regId] * modeScalar); }
+		if ( dataSource[deviceId].regAddress[regId] == 43 ) { chanMax[6]=(dataSource[deviceId].value[regId] * modeScalar); }
+		if ( dataSource[deviceId].regAddress[regId] == 59 ) { chanMin[6]=(dataSource[deviceId].value[regId] * modeScalar); }
 
 		// Deals with chan 7 value registers
-		if ( dataSource[deviceId].regAddress[regId] == 13 ) { chanLve[7]=dataSource[deviceId].value[regId]; }
-		if ( dataSource[deviceId].regAddress[regId] == 29 ) { chanAvg[7]=dataSource[deviceId].value[regId]; }
-		if ( dataSource[deviceId].regAddress[regId] == 45 ) { chanMax[7]=dataSource[deviceId].value[regId]; }
-		if ( dataSource[deviceId].regAddress[regId] == 61 ) { chanMin[7]=dataSource[deviceId].value[regId]; }
+		if ( dataSource[deviceId].regAddress[regId] == 13 ) { chanLve[7]=(dataSource[deviceId].value[regId] * modeScalar); }
+		if ( dataSource[deviceId].regAddress[regId] == 29 ) { chanAvg[7]=(dataSource[deviceId].value[regId] * modeScalar); }
+		if ( dataSource[deviceId].regAddress[regId] == 45 ) { chanMax[7]=(dataSource[deviceId].value[regId] * modeScalar); }
+		if ( dataSource[deviceId].regAddress[regId] == 61 ) { chanMin[7]=(dataSource[deviceId].value[regId] * modeScalar); }
 
 		// Deals with chan 8 value registers
-		if ( dataSource[deviceId].regAddress[regId] == 15 ) { chanLve[8]=dataSource[deviceId].value[regId]; }
-		if ( dataSource[deviceId].regAddress[regId] == 31 ) { chanAvg[8]=dataSource[deviceId].value[regId]; }
-		if ( dataSource[deviceId].regAddress[regId] == 47 ) { chanMax[8]=dataSource[deviceId].value[regId]; }
-		if ( dataSource[deviceId].regAddress[regId] == 63 ) { chanMin[8]=dataSource[deviceId].value[regId]; }	
+		if ( dataSource[deviceId].regAddress[regId] == 15 ) { chanLve[8]=(dataSource[deviceId].value[regId] * modeScalar); }
+		if ( dataSource[deviceId].regAddress[regId] == 31 ) { chanAvg[8]=(dataSource[deviceId].value[regId] * modeScalar); }
+		if ( dataSource[deviceId].regAddress[regId] == 47 ) { chanMax[8]=(dataSource[deviceId].value[regId] * modeScalar); }
+		if ( dataSource[deviceId].regAddress[regId] == 63 ) { chanMin[8]=(dataSource[deviceId].value[regId] * modeScalar); }	
 	} 
 	
 	
@@ -618,3 +618,132 @@ int getChanConfig(modbus_t *mb, int deviceId)
 
 	return 0;
 }
+
+
+// Uses modbus_write_registers (FC16) to reset min readings back to 0 
+int resetMinReadings(int deviceId) 
+{  
+
+	int rc;	
+	int regId;
+
+
+	uint16_t tableRegisters[16] = {32767,32767,32767,32767,32767,32767,32767,32767,32767,32767,32767,32767,32767,32767,32767,32767}; // 8 element array for use with modbus write command 
+
+	// modbus device handle
+	modbus_t *mb;  
+	
+	// Defines storage for returned registers from modbus read, *must* equal or exceed maximum number of registers requested, ask me how I know...
+	uint16_t mbdata_UI16[30]; 
+
+	
+	mb = modbus_new_rtu( dataSource[deviceId].interface, 
+					 	 dataSource[deviceId].baudRate,
+						 dataSource[deviceId].parity[0],
+						 dataSource[deviceId].dataBits,
+						 dataSource[deviceId].stopBit);
+						
+	modbus_set_slave(mb, dataSource[deviceId].modbusId);
+
+
+	// Set per-byte and total timeouts, this format has changed from the older libmodbus version.		
+	// This could be useful if we've a latent RF-Link 
+	// TODO : Don't hard code this, allow it to be configurable
+	modbus_set_response_timeout(mb, 5, (5*1000000));
+	modbus_set_byte_timeout(mb,5,(5*1000000));
+
+	
+	// Enable/Disable Modbus debug
+	modbus_set_debug(mb, FALSE);
+
+	// check we can connect (not sure if this is relevant on serial modbus)
+	if(modbus_connect(mb) == -1)
+	{
+		printf("Connect Failed to Modbus ID [%i] on [%s]\n", dataSource[deviceId].modbusId, 
+															 dataSource[deviceId].interface);
+		modbus_close(mb);
+		modbus_free(mb);
+		return -1;
+	}
+
+	
+	printf("Restting Min Counters...\r\n");
+	// remember that modbus registers index from 0 so address 40001 = 0th register
+	rc = modbus_write_registers(mb, 48,  16, tableRegisters);
+	if (rc == -1)
+	{
+		printf("Modbus request Fail : Device Address [%i] Start Address [48] For [16] Registers \n",deviceId);
+		modbus_close(mb);
+		modbus_free(mb);
+		exit(1);
+	}			
+
+	
+	exit(0);
+
+}
+
+
+// Uses modbus_write_registers (FC16) to reset min readings back to 0 
+int resetMaxReadings(int deviceId) 
+{  
+
+	int rc;	
+	int regId;
+
+
+	uint16_t tableRegisters[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}; // 8 element array for use with modbus write command 
+
+	// modbus device handle
+	modbus_t *mb;  
+	
+	// Defines storage for returned registers from modbus read, *must* equal or exceed maximum number of registers requested, ask me how I know...
+	uint16_t mbdata_UI16[30]; 
+
+	
+	mb = modbus_new_rtu( dataSource[deviceId].interface, 
+					 	 dataSource[deviceId].baudRate,
+						 dataSource[deviceId].parity[0],
+						 dataSource[deviceId].dataBits,
+						 dataSource[deviceId].stopBit);
+						
+	modbus_set_slave(mb, dataSource[deviceId].modbusId);
+
+
+	// Set per-byte and total timeouts, this format has changed from the older libmodbus version.		
+	// This could be useful if we've a latent RF-Link 
+	// TODO : Don't hard code this, allow it to be configurable
+	modbus_set_response_timeout(mb, 5, (5*1000000));
+	modbus_set_byte_timeout(mb,5,(5*1000000));
+
+	
+	// Enable/Disable Modbus debug
+	modbus_set_debug(mb, FALSE);
+
+	// check we can connect (not sure if this is relevant on serial modbus)
+	if(modbus_connect(mb) == -1)
+	{
+		printf("Connect Failed to Modbus ID [%i] on [%s]\n", dataSource[deviceId].modbusId, 
+															 dataSource[deviceId].interface);
+		modbus_close(mb);
+		modbus_free(mb);
+		return -1;
+	}
+
+	
+	printf("Restting Max Counters...\n\r");
+	// remember that modbus registers index from 0 so address 40001 = 0th register
+	rc = modbus_write_registers(mb, 32,  16, tableRegisters);
+	if (rc == -1)
+	{
+		printf("Modbus request Fail : Device Address [%i] Start Address [72] For [1] Registers \n",deviceId);
+		modbus_close(mb);
+		modbus_free(mb);
+		exit(1);
+	}			
+	
+	exit(0);
+
+}
+
+
