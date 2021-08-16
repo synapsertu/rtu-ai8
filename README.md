@@ -14,13 +14,18 @@ Sample syntax
 ```
 Synapse RTU-AI8 Reader - v1.0
 
-./rtu-ai8 [-h|j|c] [-a] [-b] [-p] [-1] [-2] [-3] [-4] [-5] [-6] [-7] [-8] [-v] [-m] [-w] [-d]
+./rtu-ai8 [-h|j|c] [-a] [-b] [-p] [-r] [-t] [-1] [-2] [-3] [-4] [-5] [-6] [-7] [-8] [-v] [-m] [-w] [-d]
 
 Syntax :
 
 -h = Human readable output (default)
 -j = JSON readable output
 -c = Comma delimited minimal output
+-r = Output scaled for 4-20mA readings
+-t = Output scaled for 0-10V readings
+
+-x = Reset Max readings (all channels)
+-l = Reset Min readings (all channels)
 
 -a = Set Modbus device address (1-255)                                               - default=1
 -b = Set serial baud rate (9600/14400/19200/38400/57600)                             - default=19200
@@ -45,4 +50,5 @@ Syntax :
 Examples :
 Read RTU address 12, baud 38400 output in JSON format          :  ./rtu-ai8 -j -a 12 -b 38400 -p /dev/ttyS0
 Reconfigure RTU settings for ADC resolution and averaging only :  ./rtu-ai8 -a 3 -v 1 -1 3 -2 4 -7 2 -w -p /dev/ttyS0
+
 ```
