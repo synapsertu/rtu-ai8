@@ -505,9 +505,10 @@ int reconfigureADC(int deviceId, int adcAverageSetting, int modbusBaudSetting,  
 	// Set per-byte and total timeouts, this format has changed from the older libmodbus version.		
 	// This could be useful if we've a latent RF-Link 
 	// TODO : Don't hard code this, allow it to be configurable
-	modbus_set_response_timeout(mb, 5, (5*1000000));
-	modbus_set_byte_timeout(mb,5,(5*1000000));
+	modbus_set_response_timeout(mb, 5, 0);
+	modbus_set_byte_timeout(mb, 5, 0);
 
+	modbus_flush(mb);
 	
 	// Enable/Disable Modbus debug
 	modbus_set_debug(mb, FALSE);
@@ -517,6 +518,7 @@ int reconfigureADC(int deviceId, int adcAverageSetting, int modbusBaudSetting,  
 	{
 		printf("Connect Failed to Modbus ID [%i] on [%s]\n", dataSource[deviceId].modbusId, 
 															 dataSource[deviceId].interface);
+	    modbus_flush(mb);
 		modbus_close(mb);
 		modbus_free(mb);
 		return -1;
@@ -535,6 +537,7 @@ int reconfigureADC(int deviceId, int adcAverageSetting, int modbusBaudSetting,  
 			if (rc == -1)
 			{
 				printf("Modbus request Fail : Device Address [%i] Start Address [%i] For [1] Registers \n",deviceId,(63+i) );
+				modbus_flush(mb);
 				modbus_close(mb);
 				modbus_free(mb);
 				exit(1);
@@ -550,6 +553,7 @@ int reconfigureADC(int deviceId, int adcAverageSetting, int modbusBaudSetting,  
 		if (rc == -1)
 		{
 			printf("Modbus request Fail : Device Address [%i] Start Address [72] For [1] Registers \n",deviceId);
+			modbus_flush(mb);
 			modbus_close(mb);
 			modbus_free(mb);
 			exit(1);
@@ -564,6 +568,7 @@ int reconfigureADC(int deviceId, int adcAverageSetting, int modbusBaudSetting,  
 		if (rc == -1)
 		{
 			printf("Modbus request Fail : Device Address [%i] Start Address [73] For [1] Registers \n",deviceId);
+			modbus_flush(mb);
 			modbus_close(mb);
 			modbus_free(mb);
 			exit(1);
@@ -579,11 +584,15 @@ int reconfigureADC(int deviceId, int adcAverageSetting, int modbusBaudSetting,  
 	if (rc == -1)
 	{
 		printf("Modbus request Fail : Device Address [%i] Start Address [74] For [1] Registers \n",deviceId);
+		modbus_flush(mb);
 		modbus_close(mb);
 		modbus_free(mb);
 		exit(1);
 	}	
 
+	modbus_flush(mb);
+	modbus_close(mb);
+	modbus_free(mb);
 	exit(0);
 
 }
@@ -602,6 +611,7 @@ int getChanConfig(modbus_t *mb, int deviceId)
 	if (rc == -1)
 	{
 		printf("Modbus request Fail : Device Address [%i] Start Address [64] For [8] Registers \n",deviceId);
+		modbus_flush(mb);
 		modbus_close(mb);
 		modbus_free(mb);
 		exit(1);
@@ -647,12 +657,14 @@ int resetMinReadings(int deviceId)
 
 
 	// Set per-byte and total timeouts, this format has changed from the older libmodbus version.		
+	// you can use EITHER seconds OR microseconds, using BOTH will cause the command to be ignored.	
 	// This could be useful if we've a latent RF-Link 
 	// TODO : Don't hard code this, allow it to be configurable
-	modbus_set_response_timeout(mb, 5, (5*1000000));
-	modbus_set_byte_timeout(mb,5,(5*1000000));
+	modbus_set_response_timeout(mb, 5, 0);
+	modbus_set_byte_timeout(mb, 5, 0);
 
-	
+	modbus_flush(mb);
+
 	// Enable/Disable Modbus debug
 	modbus_set_debug(mb, FALSE);
 
@@ -661,6 +673,7 @@ int resetMinReadings(int deviceId)
 	{
 		printf("Connect Failed to Modbus ID [%i] on [%s]\n", dataSource[deviceId].modbusId, 
 															 dataSource[deviceId].interface);
+		modbus_flush(mb);
 		modbus_close(mb);
 		modbus_free(mb);
 		return -1;
@@ -673,11 +686,16 @@ int resetMinReadings(int deviceId)
 	if (rc == -1)
 	{
 		printf("Modbus request Fail : Device Address [%i] Start Address [48] For [16] Registers \n",deviceId);
+		modbus_flush(mb);
 		modbus_close(mb);
 		modbus_free(mb);
 		exit(1);
 	}			
 
+	modbus_flush(mb);
+	modbus_close(mb);
+	modbus_free(mb);
+	exit(1);
 	
 	exit(0);
 
@@ -713,9 +731,10 @@ int resetMaxReadings(int deviceId)
 	// Set per-byte and total timeouts, this format has changed from the older libmodbus version.		
 	// This could be useful if we've a latent RF-Link 
 	// TODO : Don't hard code this, allow it to be configurable
-	modbus_set_response_timeout(mb, 5, (5*1000000));
-	modbus_set_byte_timeout(mb,5,(5*1000000));
+	modbus_set_response_timeout(mb, 5, 0);
+	modbus_set_byte_timeout(mb, 5, 0);
 
+	modbus_flush(mb);
 	
 	// Enable/Disable Modbus debug
 	modbus_set_debug(mb, FALSE);
@@ -725,6 +744,7 @@ int resetMaxReadings(int deviceId)
 	{
 		printf("Connect Failed to Modbus ID [%i] on [%s]\n", dataSource[deviceId].modbusId, 
 															 dataSource[deviceId].interface);
+		modbus_flush(mb);
 		modbus_close(mb);
 		modbus_free(mb);
 		return -1;
@@ -737,13 +757,17 @@ int resetMaxReadings(int deviceId)
 	if (rc == -1)
 	{
 		printf("Modbus request Fail : Device Address [%i] Start Address [72] For [1] Registers \n",deviceId);
+
+		modbus_flush(mb);
 		modbus_close(mb);
 		modbus_free(mb);
 		exit(1);
 	}			
-	
-	exit(0);
 
+	modbus_flush(mb);
+	modbus_close(mb);
+	modbus_free(mb);
+	exit(0);
 }
 
 
