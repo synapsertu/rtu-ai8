@@ -69,13 +69,12 @@ int getModbusValues()
 		// This could be useful if we've a latent RF-Link
 		// TODO : Don't hard code this, allow it to be configurable
 		modbus_set_response_timeout(mb, 5, 0);
-		modbus_set_byte_timeout(mb, 5, 0);
+		modbus_set_byte_timeout(mb, 1, 0);
 
 		// Enable/Disable Modbus debug
 		modbus_set_debug(mb, FALSE);
 
-		modbus_flush(mb);
-
+		
 		// check we can connect (not sure if this is relevant on serial modbus)
 		if (modbus_connect(mb) == -1)
 		{
@@ -87,10 +86,15 @@ int getModbusValues()
 			exit(1);
 		}
 
-		// Get RTU Specific channel config by making a read from the RTU module ahead of the main request
-		// Defined in adc.c
-		getChanConfig(mb, deviceId);
-
+		modbus_flush(mb);  // Beware :
+						   //			
+                           // During debug we found on occasion CTRL+C-ing out of fast looped modpoll left our serial port
+						   // receive buffer with extra characters remaining or in a state, causing errors next time it's run. 
+						   //
+						   // Using `cat < /dev/ttyAMA0` before running looped program solved this
+						   
+		
+		
 		/*   Optimise modbus register reads, 
 
 			 e.g. here's our map

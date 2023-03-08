@@ -50,7 +50,7 @@
 // Functions
 #include "config.c"
 #include "modbus.c"
-#include "rtudecode.c"
+
 
 int main(int argc, char *argv[])
 {
@@ -66,9 +66,12 @@ int main(int argc, char *argv[])
 	int modeScalar=1; // 4-20ma = x10   0-10V = x5  (see user guide)  default = 1
 	int setMaxToZero=0;
 	int setMinToZero=0;
+	int rawReadMode=0;  
+	int setRawReadMode=0;  
 
-	// Load Config, this is
-	readConfig();
+	
+	readConfig();  // config.c
+
 
 	// Command line options
 	//
@@ -76,7 +79,7 @@ int main(int argc, char *argv[])
 	//
 	// The colon after the letter tells getopt to expect an argument after the option
 	// To disable the automatic error printing, put a colon as the first character
-	while ((opt = getopt(argc, argv, ":hjcda:b:p:rtxl1:2:3:4:5:6:7:8:v:m:w")) != -1)
+	while ((opt = getopt(argc, argv, ":hjcda:b:p:rtxl1:2:3:4:5:6:7:8:v:m:wq:y")) != -1)
 	{
 		switch (opt)
 		{
@@ -185,9 +188,18 @@ int main(int argc, char *argv[])
 				modbusBaudSetting = atoi(optarg);
 			}
 			break;
+		case 'q': // Set value for RTU Baud Rate register  (use in conjunction with -w flag)
+			if (atoi(optarg) < 3 && atoi(optarg) > 0)
+			{
+				setRawReadMode = atoi(optarg);
+			}			
+			break;
+		case 'y': // decode raw adc values from RTU unit
+				rawReadMode= 1;			
+			break;
 		case '?':
-			printf("Synapse RTU-AI8 Reader - v1.0\n\n");
-			printf("%s [-h|j|c] [-a] [-b] [-p] [-r] [-t] [-1] [-2] [-3] [-4] [-5] [-6] [-7] [-8] [-v] [-m] [-w] [-d]\n\n", argv[0]);
+			printf("Synapse RTU-AI8 Reader - v1.3\n\n");
+			printf("%s [-h|j|c] [-a?] [-b?] [-p?] [-r|t] [-1?] [-2?] [-3?] [-4?] [-5?] [-6?] [-7?] [-8?] [-v?] [-m?] [-w] [-q?] [-y] [-d]\n\n", argv[0]);
 			printf("Syntax :\n\n");
 			printf("-h = Human readable output (default)\n");
 			printf("-j = JSON readable output\n");
@@ -212,7 +224,10 @@ int main(int argc, char *argv[])
 			printf("-8 = Set Channel 8 ADC channel resolution register (1=12Bit|2=14Bit|3=16Bit|4=18Bit) - default=16Bit\n");
 			printf("\n");
 			printf("-v = Set value for RTU ADC average readings period register (1=4|2=8|3=16)           - default=8 readings\n");
-			printf("-m = Set value for RTU Baud Rate register (1=9600/2=14400/3=19200/4=38400/5=57600)  \n");
+			printf("-m = Set value for RTU Baud Rate register (1=9600/2=14400/3=19200/4=38400/5=57600)   - default=3\n");
+			printf("\n");
+			printf("-q = Set RTU unit to ouput raw ADC readings mode on/off (1=off/2=on)                 - default=1\n");
+			printf("-y = decode raw ADC values\n");
 			printf("\n");
 			printf("-w = Confirm writing configured setting registers to RTU NVRAM\n");
 			printf("\n");
@@ -229,13 +244,13 @@ int main(int argc, char *argv[])
 
 	if (displayType == HUMANREAD)
 	{
-		printf("\nSynapse RTU-AI8 Reader - v1.0\n\n");
+		printf("\nSynapse RTU-AI8 Reader - v1.3\n\n");
 	}
 
-	// Write
+	// Write new config to unit
 	if (configWrite == 1)
 	{
-		if (reconfigureADC(deviceId, adcAverageSetting, modbusBaudSetting, chanResSetting) == -1)
+		if (reconfigureADC(deviceId, adcAverageSetting, modbusBaudSetting, chanResSetting, setRawReadMode) == -1)
 		{
 			printf("..Fatal Error : Error Reading Modbus device(s) \n\n");
 			exit(1);
@@ -243,7 +258,7 @@ int main(int argc, char *argv[])
 	}
 	
 
-
+	// Clear Min counters on all channels
 	if (setMinToZero == 1)
 	{
 		if (resetMinReadings(deviceId) == -1)
@@ -253,6 +268,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	// Clear Max counters on all channels
 	if (setMaxToZero == 1)
 	{
 		if (resetMaxReadings(deviceId) == -1)
@@ -262,7 +278,16 @@ int main(int argc, char *argv[])
 		}
 	}
 
-
+	
+    if (rawReadMode == 1)
+	{
+		// Reconfigure reg type for raw read mode so we decode the registers correctly
+		// DataSource[deviceId].regType[1] -[32]  = 3 for 32bit Unsigned Integer (raw read) or 7 for 32bit 754 Float (default)
+		for ( int n = 1 ; n < 33; n++)
+		{
+		 	dataSource[deviceId].regType[n] = 3;
+		}
+	}
 
 
 	if (debugMode == 1)
@@ -270,11 +295,13 @@ int main(int argc, char *argv[])
 		printConfig();
 	}
 
+
 	// Read in Modbus registers
 	if (displayType == HUMANREAD)
 	{
 		printf("Modbus Reads...\n");
 	}
+	
 	if (getModbusValues() == 0)
 	{
 		if (displayType == HUMANREAD)
@@ -288,8 +315,15 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	// Decode the read in raw modbus ADC values into 12/14/16/18bit floating point readings
-	decodeRtuUnits();
+	// Decode raw modbus ADC values into 12/14/16/18bit floating point readings	
+	if (rawReadMode == 1)
+	{
+		// If the RTU unit is in raw ADC output mode, where we have to do the math to convert the readings
+		// do 
+		getAdcChanConfig(deviceId);
+		decodeRawAdcModbusReadings(deviceId);
+	}
+
 
 	// Print output in desired format
 	for (deviceId = 1; deviceId < (config.dsTotal + 1); deviceId++)

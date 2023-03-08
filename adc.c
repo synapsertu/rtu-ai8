@@ -162,7 +162,9 @@ void displayAdcValues(int deviceId, int displayType, int modeScalar)
 }
 
 
-void decodeAdcModbusReadings(int deviceId)
+// Use this routine only if you have the ADC RTU unit in RAW ADC reading output mode, by default
+// the RTU unit presents pre-calculated readings as IEE754 Floats 
+void decodeRawAdcModbusReadings(int deviceId)
 {
 	
 	int regId;
@@ -452,7 +454,7 @@ void decodeAdcModbusReadings(int deviceId)
 
 
 // Uses modbus_write_registers (FC16) to write single config registers 
-int reconfigureADC(int deviceId, int adcAverageSetting, int modbusBaudSetting,  int chanResSetting[])
+int reconfigureADC(int deviceId, int adcAverageSetting, int modbusBaudSetting,  int chanResSetting[],int setRawReadMode )
 {  
 
 	int rc;	
@@ -487,9 +489,6 @@ int reconfigureADC(int deviceId, int adcAverageSetting, int modbusBaudSetting,  
 	
 	// Defines storage for returned registers from modbus read, *must* equal or exceed maximum number of registers requested, ask me how I know...
 	uint16_t mbdata_UI16[30]; 
-
-
-	
 
 	printf("Processing Config Changes...\n");	
 
@@ -576,14 +575,30 @@ int reconfigureADC(int deviceId, int adcAverageSetting, int modbusBaudSetting,  
 
 	}
 
+   if (setRawReadMode>0)	
+   {	
+   		printf("Changing RTU ADC Raw readings output mode to %i...\n", (setRawReadMode-1));		
+		tableRegisters[0]=(setRawReadMode-1);
+		rc = modbus_write_registers(mb, 74,  1, tableRegisters);
+		if (rc == -1)
+		{
+			printf("Modbus request Fail : Device Address [%i] Start Address [74] For [1] Registers \n",deviceId);
+			modbus_flush(mb);
+			modbus_close(mb);
+			modbus_free(mb);
+			exit(1);
+		}	
+
+   }
+
     
 	printf("Writing Config Register...\n");	
 	tableRegisters[0]=255;
-	rc = modbus_write_registers(mb, 74,  1, tableRegisters);
+	rc = modbus_write_registers(mb, 75,  1, tableRegisters);
 
 	if (rc == -1)
 	{
-		printf("Modbus request Fail : Device Address [%i] Start Address [74] For [1] Registers \n",deviceId);
+		printf("Modbus request Fail : Device Address [%i] Start Address [75] For [1] Registers \n",deviceId);
 		modbus_flush(mb);
 		modbus_close(mb);
 		modbus_free(mb);
@@ -599,12 +614,49 @@ int reconfigureADC(int deviceId, int adcAverageSetting, int modbusBaudSetting,  
 
 
 // Read back the channel config from the RTU device, in this case it's the ADC channel bit resolution setting
-int getChanConfig(modbus_t *mb, int deviceId)
+int getAdcChanConfig(int deviceId)
 {
-	// Defines storage for returned registers from modbus read, *must* equal or exceed maximum number of registers requested.
+	
+	int rc;	
+
+	modbus_t *mb;  
+	
+	// Defines storage for returned registers from modbus read, *must* equal or exceed maximum number of registers requested, ask me how I know...
 	uint16_t mbdata_UI16[30]; 
 
-	int rc;	
+	
+	mb = modbus_new_rtu( dataSource[deviceId].interface, 
+					 	 dataSource[deviceId].baudRate,
+						 dataSource[deviceId].parity[0],
+						 dataSource[deviceId].dataBits,
+						 dataSource[deviceId].stopBit);
+						
+	modbus_set_slave(mb, dataSource[deviceId].modbusId);
+
+
+	// Set per-byte and total timeouts, this format has changed from the older libmodbus version.		
+	// you can use EITHER seconds OR microseconds, using BOTH will cause the command to be ignored.	
+	// This could be useful if we've a latent RF-Link 
+	// TODO : Don't hard code this, allow it to be configurable
+	modbus_set_response_timeout(mb, 5, 0);
+	modbus_set_byte_timeout(mb, 5, 0);
+
+	modbus_flush(mb);
+
+	// Enable/Disable Modbus debug
+	modbus_set_debug(mb, FALSE);
+
+	// check we can connect (not sure if this is relevant on serial modbus)
+	if(modbus_connect(mb) == -1)
+	{
+		printf("Connect Failed to Modbus ID [%i] on [%s]\n", dataSource[deviceId].modbusId, 
+															 dataSource[deviceId].interface);
+		modbus_flush(mb);
+		modbus_close(mb);
+		modbus_free(mb);
+		return -1;
+	}
+
 
 	// Get RTU-AI8 specific channel config registers
 	rc = modbus_read_registers(mb, 64, 8, mbdata_UI16);		
@@ -626,6 +678,10 @@ int getChanConfig(modbus_t *mb, int deviceId)
 	dataSource[deviceId].ChanMode[7] = mbdata_UI16[6];
 	dataSource[deviceId].ChanMode[8] = mbdata_UI16[7];
 
+	modbus_flush(mb);
+	modbus_close(mb);
+	modbus_free(mb);
+	
 	return 0;
 }
 
@@ -637,8 +693,8 @@ int resetMinReadings(int deviceId)
 	int rc;	
 	int regId;
 
-
-	uint16_t tableRegisters[16] = {32767,32767,32767,32767,32767,32767,32767,32767,32767,32767,32767,32767,32767,32767,32767,32767};
+    // write 2147483647 to the min register to force a re-set of the counter
+	uint16_t tableRegisters[16] = {32767,65535,32767,65535,32767,65535,32767,65535,32767,65535,32767,65535,32767,65535,32767,65535};
 
 	// modbus device handle
 	modbus_t *mb;  
